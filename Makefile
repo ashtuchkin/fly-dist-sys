@@ -13,3 +13,12 @@ brew:
 
 run-1: maelstrom
 	$(MAELSTROM) test -w echo --bin ./01-echo.py --node-count 1 --time-limit 10
+
+run-2: maelstrom
+	$(MAELSTROM) test -w unique-ids --bin ./02-unique_id.py --time-limit 30 --rate 1000 --node-count 3 --availability total --nemesis partition
+
+run-3a: maelstrom
+	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 1 --time-limit 20 --rate 10
+
+run-3b: maelstrom
+	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 5 --time-limit 20 --rate 10

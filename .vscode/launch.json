@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: 01-echo.py",
+            "type": "python",
+            "request": "launch",
+            "program": "01-echo.py",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

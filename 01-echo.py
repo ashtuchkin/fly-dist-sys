@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 from __future__ import annotations
+import asyncio
 import sys
-from typing import Iterable
-
-from maelstrom_node import ErrorMessage, Message, Node, process_streams
+from async_node import AsyncNode, Message
 
 
 class EchoMessage(Message):
@@ -15,18 +14,11 @@ class EchoOkMessage(Message):
     echo: str
 
 
-class EchoNode(Node):
-    def process_msgs(self, msgs: Iterable[Message]) -> Iterable[Message]:
-        for msg in msgs:
-            match msg:
-                case EchoMessage():
-                    reply_msg = EchoOkMessage(echo=msg.echo)
-                case _:
-                    reply_msg = ErrorMessage(code=12, text=f"Unknown message type: {msg!r}")
-
-            yield msg.reply(reply_msg)
-
+class EchoNode(AsyncNode):
+    def handle_echo(self, msg: EchoMessage) -> EchoOkMessage:
+        return EchoOkMessage(echo=msg.echo)
 
 if __name__ == "__main__":
     print("Starting echo node", file=sys.stderr)
-    process_streams(EchoNode)
+    node = EchoNode()
+    asyncio.run(AsyncNode.process_streams(node, stream_in=sys.stdin, stream_out=sys.stdout))
