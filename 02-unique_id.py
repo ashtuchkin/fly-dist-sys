@@ -2,15 +2,7 @@
 from __future__ import annotations
 import asyncio
 import sys
-from async_node import AsyncNode, Message
-
-
-class GenerateMessage(Message):
-    TYPE = "generate"
-
-class GenerateOkMessage(Message):
-    TYPE = "generate_ok"
-    id: str
+from async_node import AsyncNode
 
 
 class UniqueIdGeneratorNode(AsyncNode):
@@ -18,9 +10,9 @@ class UniqueIdGeneratorNode(AsyncNode):
         super().__init__()
         self._next_id = 0
 
-    def handle_generate(self, msg: GenerateMessage) -> GenerateOkMessage:
+    def handle_generate(self) -> dict:
         self._next_id += 1
-        return GenerateOkMessage(id=f"{self.node_id}-{self._next_id}")
+        return dict(id=f"{self.node_id}-{self._next_id}")
 
 
 if __name__ == "__main__":

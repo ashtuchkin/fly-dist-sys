@@ -22,3 +22,14 @@ run-3a: maelstrom
 
 run-3b: maelstrom
 	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 5 --time-limit 20 --rate 10
+
+run-3c: maelstrom
+	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 5 --time-limit 20 --rate 10 --nemesis partition
+
+run-3d: maelstrom
+	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 25 --time-limit 20 --rate 100 --latency 100
+
+run-3d-partition: maelstrom
+	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 25 --time-limit 20 --rate 100 --latency 100 --nemesis partition
+
+run-3e: run-3d

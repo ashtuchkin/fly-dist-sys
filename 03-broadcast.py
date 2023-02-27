@@ -1,60 +1,40 @@
 #!/usr/bin/env python3
-from __future__ import annotations
 import asyncio
+import math
+import random
 import sys
-from async_node import AsyncNode, Message
+from async_node import AsyncNode
 
-
-class BroadcastMessage(Message):
-    TYPE = "broadcast"
-    message: int
-
-class BroadcastOkMessage(Message):
-    TYPE = "broadcast_ok"
-
-
-class ReadMessage(Message):
-    TYPE = "read"
-
-class ReadOkMessage(Message):
-    TYPE = "read_ok"
-    messages: list[int]
-
-class TopologyMessage(Message):
-    TYPE = "topology"
-    topology: dict[str, list[str]]
-
-class TopologyOkMessage(Message):
-    TYPE = "topology_ok"
-
-
-class GossipMessage(Message):
-    TYPE = "gossip"
-    messages: list[int]
-
-
+GOSSIP_INTERVAL_SEC = 0.2
+NUM_GOSSIP_NODES = lambda total_nodes: int(math.ceil(math.sqrt(total_nodes)))
 
 class BroadcastNode(AsyncNode):
-    def __init__(self) -> None:
-        super().__init__()
+    def start_node(self) -> None:
         self.messages: set[int] = set()
+        self.num_gossip_nodes = NUM_GOSSIP_NODES(len(self.all_node_ids))
+        self.peer_node_ids = [node_id for node_id in self.all_node_ids if node_id != self.node_id]
+        self._task_group.create_task(self.gossip())
 
-    async def handle_broadcast(self, msg: BroadcastMessage) -> BroadcastOkMessage:
-        self.messages.add(msg.message)
-        gossip_msg = GossipMessage(messages=[msg.message])
-        for node_id in self.all_node_ids:
-            if node_id != self.node_id:
-                await self.send_msg(gossip_msg, node_id)
-        return BroadcastOkMessage()
+    async def gossip(self) -> None:
+        while True:
+            await asyncio.sleep(GOSSIP_INTERVAL_SEC)
 
-    def handle_read(self, msg: ReadMessage) -> ReadOkMessage:
-        return ReadOkMessage(messages=list(self.messages))
+            for peer_id in random.sample(self.peer_node_ids, self.num_gossip_nodes):
+                await self.send_msg(peer_id, "gossip", messages=list(self.messages))
 
-    def handle_topology(self, msg: TopologyMessage) -> TopologyOkMessage:
-        return TopologyOkMessage()
+    async def handle_broadcast(self, message: int) -> dict:
+        self.messages.add(message)
+        return dict()
 
-    def handle_gossip(self, msg: GossipMessage) -> None:
-        self.messages.update(msg.messages)
+    def handle_read(self) -> dict:
+        return dict(messages=list(self.messages))
+
+    def handle_topology(self, topology: dict[str, list[str]]) -> dict:
+        return dict()
+
+    def handle_gossip(self, messages: list[int]) -> None:
+        self.messages.update(messages)
+
 
 if __name__ == "__main__":
     node = BroadcastNode()
