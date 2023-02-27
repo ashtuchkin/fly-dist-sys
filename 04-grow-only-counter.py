@@ -23,6 +23,7 @@ class CounterNode(AsyncNode):
 
     async def handle_read(self) -> dict:
         # Do a "sync" to read latest values. See https://github.com/jepsen-io/maelstrom/issues/39#issuecomment-1445414521
+        # Looks like seq-kv is sequential across all keys.
         await self.store.write("sync", random.randrange(1000_000_000))
         try:
             val = await self.store.read("counter")

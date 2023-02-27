@@ -3,7 +3,7 @@ import asyncio
 import inspect
 import json
 import sys
-from typing import Awaitable, Callable, Literal, TypedDict
+from typing import Any, Awaitable, Callable, Literal, TypedDict
 
 from utils import connect_input_stream, connect_output_stream
 
@@ -79,6 +79,8 @@ class AsyncNode:
             resp = handler(**body)
             if inspect.isawaitable(resp):
                 resp = await resp
+        except KeyError as e:
+            resp = {"type": "error", "code": 20, "text": f"Key {e} not found"}
         except Exception as e:
             resp = {
                 "type": "error",
@@ -155,7 +157,7 @@ class KVStore:
         self._node = node
         self._service = service
 
-    async def read(self, key: str, timeout: float = DEFAULT_TIMEOUT_S) -> int:
+    async def read(self, key: str, timeout: float = DEFAULT_TIMEOUT_S) -> Any:
         """ Read a value from a key. Raises KeyError if the key does not exist. """
         try:
             data = await self._node.send_rpc(self._service, "read", timeout, key=key)
@@ -166,11 +168,11 @@ class KVStore:
             else:
                 raise
 
-    async def write(self, key: str, value: int, timeout: float = DEFAULT_TIMEOUT_S) -> None:
+    async def write(self, key: str, value: Any, timeout: float = DEFAULT_TIMEOUT_S) -> None:
         """ Write a value to a key. Creates a key if it does not exist. """
         await self._node.send_rpc(self._service, "write", timeout, key=key, value=value)
 
-    async def cas(self, key: str, old_value: int, new_value: int, create_if_not_exists: bool = False, timeout: float = DEFAULT_TIMEOUT_S) -> bool:
+    async def cas(self, key: str, old_value: Any, new_value: Any, create_if_not_exists: bool = False, timeout: float = DEFAULT_TIMEOUT_S) -> bool:
         """ Compare and swap. Returns True if the value was updated, False if the value was not updated."""
         params = {"key": key, "from": old_value, "to": new_value, "create_if_not_exists": create_if_not_exists}
         try:

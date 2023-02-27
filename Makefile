@@ -36,3 +36,12 @@ run-3e: run-3d
 
 run-4: maelstrom
 	$(MAELSTROM) test -w g-counter --bin ./04-grow-only-counter.py --node-count 3 --rate 100 --time-limit 20 --nemesis partition
+
+
+run-5a: maelstrom
+	$(MAELSTROM) test -w kafka --bin ./05-replicated-log.py --node-count 1 --concurrency 2n --time-limit 20 --rate 1000
+
+run-5b: maelstrom
+	$(MAELSTROM) test -w kafka --bin ./05-replicated-log.py --node-count 2 --concurrency 2n --time-limit 20 --rate 1000
+
+run-5c: run-5b
