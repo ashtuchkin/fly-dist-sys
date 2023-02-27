@@ -33,3 +33,6 @@ run-3d-partition: maelstrom
 	$(MAELSTROM) test -w broadcast --bin ./03-broadcast.py --node-count 25 --time-limit 20 --rate 100 --latency 100 --nemesis partition
 
 run-3e: run-3d
+
+run-4: maelstrom
+	$(MAELSTROM) test -w g-counter --bin ./04-grow-only-counter.py --node-count 3 --rate 100 --time-limit 20 --nemesis partition
